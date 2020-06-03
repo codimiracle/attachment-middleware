@@ -1,4 +1,27 @@
 package com.codimiracle.web.middleware.attachment.controller;
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 codimiracle
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, Publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 import com.codimiracle.web.basic.contract.ApiResponse;
 import com.codimiracle.web.basic.contract.Page;
@@ -36,8 +59,8 @@ public class AttachmentController {
         this.attachmentService = attachmentService;
     }
 
-    public Attachment uploadFile(String userId, @RequestParam("file") MultipartFile uploadfile) {
-        return attachmentService.upload(userId, uploadfile);
+    public ApiResponse<Attachment> uploadFile(String userId, MultipartFile uploadfile) {
+        return ApiResponses.data(attachmentService.upload(userId, uploadfile));
     }
 
     private void fileToResponse(String filepath, HttpServletResponse response) throws IOException {
@@ -66,8 +89,8 @@ public class AttachmentController {
     }
 
     private void downloadAttachmentOrNotFound(HttpServletRequest request, HttpServletResponse response, String referenceCode, Supplier<? extends Throwable> notFound) throws Throwable {
-        Attachment attachment = attachmentService.findById(referenceCode);
-        if (Objects.nonNull(attachment) && Objects.equals(Objects.toString(attachment.getStatus()), "1")) {
+        Attachment attachment = attachmentService.findByReferenceCode(referenceCode);
+        if (Objects.nonNull(attachment) && Objects.equals(attachment.getStatus(), Attachment.STATUS_UPLOADED)) {
             Path file = Paths.get(attachment.getFilePath());
             if (Files.exists(file)) {
                 attachmentToResponse(attachment, request, response);
@@ -113,17 +136,17 @@ public class AttachmentController {
         });
     }
 
-    public ApiResponse delete(@PathVariable String id) {
+    public ApiResponse<Void> delete(String id) {
         attachmentService.deleteById(id);
         return ApiResponses.message(200, "删除成功！");
     }
 
-    public ApiResponse entity(@PathVariable String id) {
+    public ApiResponse<Attachment> entity(String id) {
         Attachment attachment = attachmentService.findById(id);
         return ApiResponses.data(attachment);
     }
 
-    public ApiResponse collection(@ModelAttribute Page page) {
+    public ApiResponse<PageSlice<Attachment>> collection(Page page) {
         PageSlice<Attachment> slice = attachmentService.findAll(page);
         return ApiResponses.data(slice);
     }
