@@ -35,16 +35,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
+import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -166,7 +165,7 @@ public class AttachmentServiceImpl extends AbstractService<String, Attachment> i
             try {
                 Files.deleteIfExists(Paths.get(uploadFilePath));
             } catch (IOException e) {
-                log.warn("can not delete file in transaction rollback", e);
+                log.warn("can not delete file [" + uploadFilePath + "] in transaction rollback", e);
                 // enclose
             }
             //throw again
@@ -188,6 +187,13 @@ public class AttachmentServiceImpl extends AbstractService<String, Attachment> i
     @Override
     public Attachment findByReferenceCode(String referenceCode) {
         return findBy("referenceCode", referenceCode);
+    }
+
+    @Override
+    public List<Attachment> findByIdentifier(String identifier) {
+        Condition condition = new Condition(Attachment.class);
+        condition.createCriteria().andEqualTo("identifier", identifier);
+        return findByCondition(condition);
     }
 
     /**

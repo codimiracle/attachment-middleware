@@ -22,6 +22,7 @@ package com.codimiracle.web.middleware.attachment.service.impl;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 import com.codimiracle.web.middleware.attachment.pojo.po.Attachment;
 import com.codimiracle.web.middleware.attachment.service.AttachmentService;
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -109,6 +111,19 @@ public class AttachmentServiceImplTest {
         assertTrue(Files.exists(Paths.get(attachment.getFilePath())));
         attachmentService.deleteByIdLogically(attachment.getId());
         assertTrue(Files.exists(Paths.get(attachment.getFilePath())));
+    }
+
+    @Test
+    public void findByIdentifier() {
+        String identifier = "some-attachment";
+        for (int i = 0; i < 10; i++) {
+            attachmentService.upload(uploaderId + i, multipartFile, identifier);
+        }
+        List<Attachment> attachments = attachmentService.findByIdentifier(identifier);
+        assertNotNull(attachments);
+        assertEquals(10, attachments.size());
+        Attachment attachment = attachments.get(attachments.size() - 1);
+        assertEquals(uploaderId + 9, attachment.getUploaderId());
     }
 
     @AfterEach

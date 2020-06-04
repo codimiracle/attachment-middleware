@@ -26,6 +26,8 @@ import com.codimiracle.web.middleware.attachment.pojo.po.Attachment;
 import com.codimiracle.web.mybatis.contract.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 /**
  * manage uploaded attachment, and retrieve exists attachment attachment service
@@ -44,4 +46,6 @@ public interface AttachmentService extends Service<String, Attachment> {
     String getUploadDir();
 
     Attachment findByReferenceCode(String referenceCode);
+
+    List<Attachment> findByIdentifier(String identifier);
 }
